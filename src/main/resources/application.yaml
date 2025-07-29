@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: session
+  main:
+    web-application-type: none
+    banner-mode: off
+    lazy-initialization: false
+  cloud:
+    function:
+      definition: sessionFunction
+      scan-packages: com.colombia.eps.session
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  profiles:
+    active: ${SPRING_PROFILE}
+  jackson:
+    time-zone: America/Bogota
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+aws:
+  dynamo:
+    table:
+      name: ${DYNAMO_TABLE_NAME:session-table}
+  region: ${REGION:us-east-1}
+server:
+  timezone: America/Bogota

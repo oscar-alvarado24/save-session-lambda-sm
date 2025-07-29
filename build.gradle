@@ -1,59 +1,116 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'com.colombia.eps'
 version = '1.0.0'
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
     mavenCentral()
 }
 
+// Configuración del BOM de Spring Cloud
+ext {
+    springCloudVersion = '2023.0.0'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 dependencies {
     // AWS Lambda Core
-    implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
-
-    // AWS Lambda Events (para APIGatewayProxyRequestEvent)
-    implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.3'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.4'
 
     // AWS SDK v1 para DynamoDB
     implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.470'
 
-    // Jackson para JSON
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    // Spring Cloud Function
+    implementation 'org.springframework.cloud:spring-cloud-function-web'
+    implementation 'org.springframework.cloud:spring-cloud-function-adapter-aws'
+
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    // Jackson
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Logging
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+}
+bootJar {
+    enabled = false
 }
 
-// Configuración del plugin Shadow para crear fat JAR
+// Habilita el JAR estándar
+jar {
+    enabled = true
+}
+
+// Configura ShadowJar para crear un fat JAR compatible con AWS
 shadowJar {
     archiveBaseName = 'session'
     archiveClassifier = ''
+    mergeServiceFiles()
+    append('META-INF/spring.handlers')
+    append('META-INF/spring.schemas')
+    append('META-INF/spring.factories')
+    append('META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports')
 
-    // Excluir archivos no necesarios para reducir tamaño
+    // Transformadores para Spring
+    transform(AppendingTransformer) {
+        resource = 'META-INF/spring.factories'
+    }
+
+    // Configura el manifest
+    manifest {
+        attributes(
+                'Main-Class': 'com.colombia.eps.session.AwsLambdaHandler',
+                'Start-Class': 'com.colombia.eps.session.SessionApplication'
+        )
+    }
+
+    // Excluir archivos de firma
     exclude 'META-INF/*.SF'
     exclude 'META-INF/*.DSA'
     exclude 'META-INF/*.RSA'
+}
 
-    // Configurar transformer para manejar archivos de servicio duplicados
-    mergeServiceFiles()
+// Asegura que la tarea build dependa de shadowJar
+build.dependsOn shadowJar
+// Configuración para Spring Boot
+springBoot {
+    mainClass = 'com.colombia.eps.session.SessionApplication'
 }
-build {
-    dependsOn shadowJar
-}
+
+
 // Configuración de compilación
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
-}
-
-// Tarea para crear el JAR para AWS Lambda
-tasks.register('buildLambda') {
-    dependsOn shadowJar
-    doLast {
-        println "Lambda JAR creado: ${shadowJar.archiveFile.get()}"
-    }
 }

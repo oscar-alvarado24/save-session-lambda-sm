@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Variables con valores por defecto -->
-    <variable name="LOG_LEVEL" value="${logging.level}" />
-    <variable name="APP_LOG_LEVEL" value="${APP_LOG_LEVEL:-${LOG_LEVEL}}" />
+    <!-- Configuración para perfil LOCAL -->
+    <springProfile name="local">
+        <property name="LOG_LEVEL" value="DEBUG" />
+        <property name="APP_LOG_LEVEL" value="DEBUG" />
+    </springProfile>
+
+    <!-- Configuración para todos los demás perfiles -->
+    <springProfile name="!local">
+        <property name="LOG_LEVEL" value="INFO" />
+        <property name="APP_LOG_LEVEL" value="INFO" />
+    </springProfile>
 
     <!-- Appender para consola -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

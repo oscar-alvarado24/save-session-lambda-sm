@@ -1,0 +1,6 @@
+aws:
+  dynamo:
+    endpoint: "http://host.docker.internal:4566"
+
+url:
+  front: "localhost:4200"
