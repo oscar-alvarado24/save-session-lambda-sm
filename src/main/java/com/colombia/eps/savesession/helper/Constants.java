@@ -1,4 +1,4 @@
-package com.colombia.eps.session.helper;
+package com.colombia.eps.savesession.helper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,5 +16,6 @@ public final class Constants {
     public static final String API_URL = "http://ip-api.com/json/%s?fields=city,status,message";
     public static final String MSG_ERROR = "Error: %s";
     public static final String SUCCESSFULLY = "Lambda ejecutada exitosamente";
+    public static final String MSG_ERROR_PARAMS_NOT_VALID = "Parametros de email y/o ip invalidos";
+    public static final String MSG_ERROR_PROCESSING = "Error al ejecutar la lambda";
 }
-

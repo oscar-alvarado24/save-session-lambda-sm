@@ -1,44 +1,39 @@
-package com.colombia.eps.session.model;
+package com.colombia.eps.savesession.model;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 @Getter
 @Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@DynamoDBTable(tableName = "")
+@NoArgsConstructor
+@DynamoDbBean
 public class Session {
     private String email;
     private String connectionTime;
     private String ip;
     private String city;
 
-    @DynamoDBHashKey(attributeName = "id")
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute("id")
     public String getEmail(){
         return this.email;
     }
-    @DynamoDBAttribute(attributeName = "id")
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
-    @DynamoDBRangeKey(attributeName = "connection_time")
+    @DynamoDbSortKey
+    @DynamoDbAttribute("connection_time")
     public String getConnectionTime(){
         return this.connectionTime;
     }
-    @DynamoDBAttribute(attributeName = "ip")
-    public String getIp(){
-        return this.ip;
-    }
+
 
     @Override
     public String toString() {

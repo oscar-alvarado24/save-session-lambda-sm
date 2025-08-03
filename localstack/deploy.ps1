@@ -40,18 +40,18 @@ Write-Host "Directorio actual: $currentDir" -ForegroundColor Cyan
 # Determinar la ruta relativa según desde dónde se ejecuta
 if ($currentDir -eq "localstack") {
     # Se ejecuta desde la carpeta localstack
-    $jarPath = "../build/libs/session-1.0.0.jar"
+    $zipPath = "../build/function.zip"
     Write-Host "Ejecutándose desde carpeta localstack" -ForegroundColor Green
 } else {
     # Se ejecuta desde la carpeta principal del proyecto
-    $jarPath = "./build/libs/session-1.0.0.jar"
+    $zipPath = "./build/function.zip"
     Write-Host "Ejecutándose desde carpeta principal del proyecto" -ForegroundColor Green
 }
 
 
 # Verificar que el archivo existe
-if (-not (Test-Path $jarPath)) {
-    Write-Host "Error: No se encontró el archivo $jarPath" -ForegroundColor Red
+if (-not (Test-Path $zipPat)) {
+    Write-Host "Error: No se encontró el archivo $zipPath" -ForegroundColor Red
     Write-Host "Ubicación actual: $(Get-Location)" -ForegroundColor Yellow
     Write-Host "Archivos en el directorio actual:" -ForegroundColor Yellow
     Get-ChildItem -Name
@@ -64,7 +64,7 @@ if (-not (Test-Path $jarPath)) {
     }
     exit 1
 } else {
-    Write-Host "JAR encontrado correctamente en: $jarPath" -ForegroundColor Green
+    Write-Host "JAR encontrado correctamente en: $zipPath" -ForegroundColor Green
 }
 
 
@@ -186,7 +186,7 @@ try {
 
 # Crear funcion Lambda
 Write-Host "Creando funcion Lambda..." -ForegroundColor Yellow
-$createFunctionCommand = "aws lambda create-function --endpoint-url=http://localhost:4566 --function-name $FunctionName --runtime $Runtime --role arn:aws:iam::000000000000:role/lambda-execution-role --handler $Handler --zip-file fileb://$jarPath --environment Variables='{DYNAMO_TABLE_NAME=$TableName,AWS_ENDPOINT_URL=http://localhost:4566,SPRING_CLOUD_FUNCTION_DEFINITION=$SessionFunction,MAIN_CLASS=$MainClass,URL_FRONT=$UrlFront,SPRING_PROFILE=$SpringProfile}'"
+$createFunctionCommand = "aws lambda create-function --endpoint-url=http://localhost:4566 --function-name $FunctionName --runtime $Runtime --role arn:aws:iam::000000000000:role/lambda-execution-role --handler $Handler --zip-file fileb://$zipPat --environment Variables='{DYNAMO_TABLE_NAME=$TableName,AWS_ENDPOINT_URL=http://localhost:4566,SPRING_CLOUD_FUNCTION_DEFINITION=$SessionFunction,MAIN_CLASS=$MainClass,URL_FRONT=$UrlFront,SPRING_PROFILE=$SpringProfile}'"
 
 Invoke-AwsCommand -Command $createFunctionCommand -SuccessMessage "Funcion Lambda creada exitosamente" -WarningMessage "Error creando funcion Lambda"
 
