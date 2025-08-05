@@ -1,0 +1,31 @@
+{
+  "name": "save-session-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function to save user sessions with geolocation",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "npm install --production",
+    "zip": "zip -r save-session-lambda.zip . -x '*.git*' 'node_modules/.cache/*' '*.md' '*.txt' '.DS_Store' '*.log'",
+    "deploy": "npm run build && npm run zip",
+    "clean": "rm -f save-session-lambda.zip",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0",
+    "axios": "^1.6.0"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "dynamodb",
+    "session",
+    "geolocation"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
