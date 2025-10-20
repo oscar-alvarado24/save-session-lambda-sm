@@ -4,7 +4,7 @@
 
 1. Ensure you have Node.js and npm installed on your system.
 2. Install the required dependencies by running `npm install` in the project directory.
-3. Set the necessary environment variables, including `AWS_REGION` and `DYNAMO_TABLE_NAME`.
+3. Set the necessary environment variables, including `AWS_REGION`,  `DYNAMO_TABLE_NAME` and `SECRTE_KEY`.
 
 ## Usage
 
@@ -16,7 +16,7 @@ The expected input for the Lambda function is a JSON object with the following s
 
 ```json
 {
-  "email": "user@example.com",
+  "email": "encriptedemail",
   "ip": "192.168.1.1"
 }
 ```

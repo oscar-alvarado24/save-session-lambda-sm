@@ -5,11 +5,14 @@
 
 const CityService = require('./cityService');
 const CONSTANTS = require('../helpers/constants');
-const { formatMessage, handleError } = require('../helpers/auxiliaryMethods');
+const CryptoService = require('../helpers/crypto');
+const { validateInput } = require('../helpers/auxiliaryMethods');
+const { formatMessage } = require('../helpers/auxiliaryMethods');
 
 class SessionService {
     constructor(dynamoRepository) {
         this.cityService = new CityService();
+        this.cryptoService = new CryptoService();
         this.dynamoRepository = dynamoRepository;
     }
 
@@ -19,55 +22,64 @@ class SessionService {
      * @param {string} ip - Dirección IP
      * @returns {Promise<string>} - Mensaje de resultado
      */
-    async saveSession(email, ip) {
-        console.log('=== Iniciando función Lambda ===');
-        
+    async saveSession(emailEncripted, ip) {
         try {
-            console.log(`Email: ${email}, IP: ${ip}`);
+            console.log('=== Iniciando función Lambda ===');
+            if (!emailEncripted ) {                
+                return {
+                    success: false,
+                    statusCode: 400,
+                    message: CONSTANTS.MSG_ERROR_IP_MISSING
+                }
+            }
+            const email = await this.cryptoService.decrypt(emailEncripted);
+            const dataValidations = validateInput(email, ip);
+            if (dataValidations.isValid) {
 
-            console.log(`Obteniendo información de geolocalización para IP: ${ip}`);
-            
-            // Obtener información completa de geolocalización
-            const locationInfo = await this.cityService.getLocationInfo(ip);
-            
-            console.log('Información de ubicación obtenida:', JSON.stringify(locationInfo));
-            
-            // Guardar en DynamoDB usando email como sessionId
-            await this.dynamoRepository.saveSession(
-                email, 
-                ip, 
-                locationInfo.city,
-                locationInfo.timezone,
-                locationInfo.country,
-                locationInfo.coordinates
-            );
-            
-            console.log('=== Función completada exitosamente ===');
-            
-            return formatMessage(CONSTANTS.MESSAGE, CONSTANTS.SUCCESSFULLY);
-            
+                console.log(`Email: ${email}, IP: ${ip}`);
+
+                console.log(`Obteniendo información de geolocalización para IP: ${ip}`);
+
+                const locationInfo = await this.cityService.getLocationInfo(ip);
+
+                console.log('Información de ubicación obtenida:', JSON.stringify(locationInfo));
+
+                await this.dynamoRepository.saveSession(
+                    email,
+                    ip,
+                    locationInfo.city,
+                    locationInfo.timezone,
+                    locationInfo.country,
+                    locationInfo.coordinates
+                );
+            const sessionCount = await this.dynamoRepository.countSessionsById(email);
+
+            console.log(`Cantidad de sesiones encontradas: ${sessionCount}`);
+
+            if (sessionCount > CONSTANTS.MAX_SESSIONS_PER_USER) {
+                console.log('Límite alcanzado, eliminando sesión más antigua...');
+                await this.dynamoRepository.deleteOldestSession(email);
+                console.log('Sesión más antigua eliminada');
+            }
+
+                console.log('=== Función completada exitosamente ===');
+
+                return {
+                    success: true,
+                    message: formatMessage(CONSTANTS.MESSAGE, CONSTANTS.SUCCESSFULLY)
+                }
+            }
+
         } catch (error) {
             console.error(`ERROR: ${error.constructor.name} - ${error.message}`);
             console.error('Stack trace: ', error.stack);
-            return formatMessage(CONSTANTS.MSG_ERROR, error.message);
+            return {
+                    success: false,
+                    statusCode: error.statusCode || 500,
+                    message: dataValidations.errors.join(', ')
+                }
         }
     }
-
-    
-    /**
-     * Obtiene todas las sesiones de un usuario
-     * @param {string} email - Email del usuario
-     * @returns {Promise<Array>} - Array de sesiones
-     */
-    async getUserSessions(email) {
-        try {
-            console.log(`Obteniendo sesiones para usuario: ${email}`);
-            return await this.dynamoRepository.getAllSessions(email);
-        } catch (error) {
-            throw handleError('getUserSessions', error);
-        }
-    }
-
 }
 
 module.exports = SessionService;
