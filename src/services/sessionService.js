@@ -29,7 +29,7 @@ class SessionService {
                 return {
                     success: false,
                     statusCode: 400,
-                    message: CONSTANTS.MSG_ERROR_IP_MISSING
+                    message: CONSTANTS.MSG_ERROR_EMAIL_MISSING
                 }
             }
             const email = await this.cryptoService.decrypt(emailEncripted);
