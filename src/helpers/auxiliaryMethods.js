@@ -18,15 +18,6 @@ function getStringFromJson(jsonNode, fieldName) {
     }
 }
 
-/**
- * Formatea un mensaje con parámetros
- * @param {string} template - Template del mensaje con %s
- * @param {string} value - Valor a reemplazar
- * @returns {string} - Mensaje formateado
- */
-function formatMessage(template, value) {
-    return template.replace('%s', value);
-}
 
 /**
  * Valida si una cadena no está vacía
@@ -182,7 +173,6 @@ function validateInput(email, ip) {
 
 module.exports = {
     getStringFromJson,
-    formatMessage,
     isValidString,
     getCurrentTimestamp,
     handleError,

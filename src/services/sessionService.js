@@ -7,7 +7,6 @@ const CityService = require('./cityService');
 const CONSTANTS = require('../helpers/constants');
 const CryptoService = require('../helpers/crypto');
 const { validateInput } = require('../helpers/auxiliaryMethods');
-const { formatMessage } = require('../helpers/auxiliaryMethods');
 
 class SessionService {
     constructor(dynamoRepository) {
@@ -66,7 +65,7 @@ class SessionService {
 
                 return {
                     success: true,
-                    message: formatMessage(CONSTANTS.MESSAGE, CONSTANTS.SUCCESSFULLY)
+                    message: CONSTANTS.SUCCESSFULLY
                 }
             }
 

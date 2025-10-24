@@ -2,7 +2,6 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const DynamoRepository = require('./src/repository/dynamoRepository');
 const SessionService = require('./src/services/sessionService');
 const CONSTANTS = require('./src/helpers/constants');
-const { validateInput } = require('./src/helpers/auxiliaryMethods');
 
 const dynamoClient = new DynamoDBClient({
     region: process.env.AWS_REGION || 'us-east-1'
@@ -21,12 +20,12 @@ exports.handler = async (event, context) => {
         if (response.success) {
             return {
                 statusCode: 200,
-                body: response.message
+                body: JSON.stringify({ [CONSTANTS.MESSAGE]: response.message})
             };
         } else {
             return {
                 statusCode: response.statusCode,
-                body: response.message
+                body: JSON.stringify({ [CONSTANTS.MESSAGE]: response.message})
             };
         }
     } catch (error) {
@@ -34,7 +33,7 @@ exports.handler = async (event, context) => {
 
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: CONSTANTS.MSG_ERROR_PROCESSING })
+            body: JSON.stringify({ [CONSTANTS.MSG_ERROR]: CONSTANTS.MSG_ERROR_PROCESSING })
         };
     }
 };
