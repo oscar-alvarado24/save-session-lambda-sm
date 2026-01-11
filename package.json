@@ -11,8 +11,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.450.0",
-    "@aws-sdk/lib-dynamodb": "^3.450.0",
-    "axios": "^1.6.0"
+    "@aws-sdk/lib-dynamodb": "^3.450.0"
   },
   "keywords": [
     "aws",
@@ -24,6 +23,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "author": "",
+  "author": "Oscar Alvarado",
   "license": "ISC"
 }

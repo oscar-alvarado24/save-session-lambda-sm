@@ -1,5 +1,5 @@
 /**
- * Repositorio de DynamoDB
+ * DynamoDB Repository
  */
 
 const { DynamoDBDocumentClient, PutCommand, QueryCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
@@ -19,13 +19,14 @@ class DynamoRepository {
     }
 
     /**
-     * Guarda una sesión directamente en la tabla
-     * @param {string} sessionId - ID de la sesión
-     * @param {string} ip - IP
-     * @param {string} city - Ciudad
-     * @param {string} country - País
-     * @param {string} timezone - Zona horaria
-     * @param {string} timestamp - Timestamp
+     * Save a session directly in the table
+     * @param {string} sessionId - Session ID
+     * @param {string} ip - IP address
+     * @param {string} city - City name
+     * @param {string} country - Country
+     * @param {string} timezone - Timezone name
+     * @param {string} coordinates - Coordinates
+     * @param {string} timestamp - Timestamp of the session
      */
     async saveSession(sessionId, ip, city, timezone, country, coordinates) {
         try {
@@ -80,8 +81,8 @@ class DynamoRepository {
     }
 
     /**
-     * Elimina la sesión más antigua para un sessionId
-     * @param {string} sessionId - ID de la sesión
+     * Delete oldest session for a given sessionId
+     * @param {string} sessionId - ID of the session to delete
      */
     async deleteOldestSession(sessionId) {
         try {
@@ -108,7 +109,7 @@ class DynamoRepository {
     }
 
     /**
-     * Obtiene la sesión más antigua para un sessionId
+     * Ge la sesión más antigua para un sessionId
      * @param {string} sessionId - ID de la sesión
      * @returns {Promise<Object|null>} - Sesión más antigua o null
      */

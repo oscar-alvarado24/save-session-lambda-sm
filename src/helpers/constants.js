@@ -14,6 +14,7 @@ const CONSTANTS = {
     MSG_ERROR_PROCESSING: 'Error procesando la solicitud',
     MSG_ERROR_EMAIL_AND_IP_MISSING: 'Faltan parámetros email y ip',
     MSG_ERROR_EMAIL_MISSING: 'Falta parámetro email',
+    MSG_ERROR_PARAMS_MISSING: 'Faltan parámetros obligatorios',
     MSG_ERROR_IP_MISSING: 'Falta parámetro ip',
     MAX_SESSIONS_PER_USER: 5,
     MAX_RETRY_ATTEMPTS: 3,
@@ -22,7 +23,9 @@ const CONSTANTS = {
         OK: 200,
         BAD_REQUEST: 400,
         INTERNAL_SERVER_ERROR: 500
-    }
+    },
+    BASE_64: 'base64',
+    UTF_8: 'utf8'
 };
 
 module.exports = CONSTANTS;

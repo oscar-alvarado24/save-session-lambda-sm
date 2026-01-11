@@ -1,16 +1,13 @@
 /**
  * Servicio de Session
- * Equivalente a SessionService.java
  */
 
-const CityService = require('./cityService');
 const CONSTANTS = require('../helpers/constants');
 const CryptoService = require('../helpers/crypto');
 const { validateInput } = require('../helpers/auxiliaryMethods');
 
 class SessionService {
     constructor(dynamoRepository) {
-        this.cityService = new CityService();
         this.cryptoService = new CryptoService();
         this.dynamoRepository = dynamoRepository;
     }
@@ -19,37 +16,45 @@ class SessionService {
      * Guarda una sesión completa
      * @param {string} email - Email del usuario
      * @param {string} ip - Dirección IP
+     * @param {string} city - Ciudad
+     * @param {string} country - País
+     * @param {string} localtime - Hora local
+     * @param {string} timezone - Zona horaria
+     * @param {string} latitude - Latitud
+     * @param {string} longitude - Longitud
      * @returns {Promise<string>} - Mensaje de resultado
      */
-    async saveSession(emailEncripted, ip) {
+    async saveSession(emailEncripted, ipEncripted, cityEncripted, country, localtime, timezoneEncripted, latitudeEncripted, longitudeEncripted) {
         try {
             console.log('=== Iniciando función Lambda ===');
-            if (!emailEncripted ) {                
+            if (!emailEncripted || !ipEncripted || !cityEncripted || !timezoneEncripted || !latitudeEncripted || !longitudeEncripted) {
                 return {
                     success: false,
                     statusCode: 400,
-                    message: CONSTANTS.MSG_ERROR_EMAIL_MISSING
+                    message: CONSTANTS.MSG_ERROR_PARAMS_MISSING
                 }
             }
             const email = await this.cryptoService.decrypt(emailEncripted);
-            const dataValidations = validateInput(email, ip);
+            const ip = await this.cryptoService.decrypt(ipEncripted);
+            const city = await this.cryptoService.decrypt(cityEncripted);
+            const timezone = await this.cryptoService.decrypt(timezoneEncripted);
+            const latitude = await this.cryptoService.decrypt(latitudeEncripted);
+            const longitude = await this.cryptoService.decrypt(longitudeEncripted);
+            const dataValidations = validateInput(email, ip, city, country, localtime, timezone, latitude, longitude);
             if (dataValidations.isValid) {
 
-                console.log(`Email: ${email}, IP: ${ip}`);
-
-                console.log(`Obteniendo información de geolocalización para IP: ${ip}`);
-
-                const locationInfo = await this.cityService.getLocationInfo(ip);
-
-                console.log('Información de ubicación obtenida:', JSON.stringify(locationInfo));
-
+                console.log(`Email: ${email}, IP: ${ip}`, `City: ${city}`, `Timezone: ${timezone}`, `Country: ${country}`, `Localtime: ${localtime}`, `Latitude: ${latitude}`, `Longitude: ${longitude}`);
+                const coordinates={
+                    latitude: latitude,
+                    longitude: longitude
+                }
                 await this.dynamoRepository.saveSession(
                     email,
                     ip,
-                    locationInfo.city,
-                    locationInfo.timezone,
-                    locationInfo.country,
-                    locationInfo.coordinates
+                    city,
+                    timezone,
+                    country,
+                    coordinates
                 );
             const sessionCount = await this.dynamoRepository.countSessionsById(email);
 
@@ -66,6 +71,13 @@ class SessionService {
                 return {
                     success: true,
                     message: CONSTANTS.SUCCESSFULLY
+                }
+            } else {
+                console.error('Errores de validación:', dataValidations.errors.join(', '));
+                return {
+                    success: false,
+                    statusCode: 400,
+                    message: CONSTANTS.MSG_ERROR_PARAMS_MISSING
                 }
             }
 
